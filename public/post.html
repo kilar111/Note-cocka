@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NOTE කොක්ක - Post Details</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <img
+            class="brand-logo"
+            src="/assets/logo.png"
+            alt="NOTE කොක්ක logo"
+            loading="eager"
+            onerror="this.onerror=null; this.src='/assets/logo.svg';"
+          />
+        </div>
+        <div class="brand-text">
+          <h1>NOTE කොක්ක</h1>
+          <small>Post details & Drive links</small>
+        </div>
+      </div>
+
+      <a class="btn btn-secondary" href="/">Back</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="status" class="meta"></div>
+
+    <article id="post" class="post" style="display:none;">
+      <img id="postImage" class="post-hero" alt="Post image" />
+      <div class="post-body">
+        <div id="postCategory" class="badge"></div>
+        <div id="sourceWrap" style="display:none; margin: 10px 0 6px;">
+          <a id="sourceLink" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">View original post</a>
+        </div>
+        <h2 id="postTitle"></h2>
+        <p id="postDescription"></p>
+
+        <h3 style="margin: 16px 0 8px;">Google Drive Links</h3>
+        <div id="driveLinks" class="link-list"></div>
+      </div>
+    </article>
+
+    <div id="error" class="error" style="display:none;"></div>
+  </main>
+
+  <script src="/js/post.js"></script>
+</body>
+</html>

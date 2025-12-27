@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NOTE කොක්ක - Admin</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <img
+            class="brand-logo"
+            src="/assets/logo.png"
+            alt="NOTE කොක්ක logo"
+            loading="eager"
+            onerror="this.onerror=null; this.src='/assets/logo.svg';"
+          />
+        </div>
+        <div class="brand-text">
+          <h1>NOTE කොක්ක</h1>
+          <small>Admin dashboard</small>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <a class="btn btn-secondary" href="/">Home</a>
+        <button id="logoutBtn" class="btn btn-secondary" style="display:none;">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- When not logged in, only show login UI. Admin APIs are session-protected server-side. -->
+    <section id="loginPanel" class="panel" style="display:none;">
+      <h2 style="margin-top:0;">Login</h2>
+      <div id="loginMsg"></div>
+
+      <div class="row">
+        <div>
+          <div class="label">Username</div>
+          <input id="username" class="input" type="text" autocomplete="username" />
+        </div>
+        <div>
+          <div class="label">Password</div>
+          <input id="password" class="input" type="password" autocomplete="current-password" />
+        </div>
+        <div>
+          <button id="loginBtn" class="btn">Login</button>
+        </div>
+      </div>
+
+      <p class="helper" style="margin-top:12px;">
+        Admin access is protected by session authentication.
+      </p>
+    </section>
+
+    <!-- When logged in, show dashboard form -->
+    <section id="dashboard" class="panel" style="display:none;">
+      <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+        <h2 id="formTitle" style="margin:0;">Create New Post</h2>
+        <div class="helper">Posts save instantly and appear on Home.</div>
+      </div>
+
+      <div id="adminMsg" style="margin-top:12px;"></div>
+
+      <form id="postForm" style="margin-top:12px;">
+        <div class="row">
+          <div>
+            <div class="label">Facebook post link (optional)</div>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <input id="fbUrl" class="input" type="url" placeholder="https://web.facebook.com/..." style="flex:1;" />
+              <button id="fbFetchBtn" class="btn btn-secondary" type="button">Fetch</button>
+            </div>
+            <div class="helper">Paste a Facebook post/video link and click Fetch to auto-fill title/description/image (works best for public links).</div>
+            <div id="fbMsg" style="margin-top:10px;"></div>
+
+            <!-- Hidden fields used when publishing (backend will store them). -->
+            <input id="imageUrl" type="hidden" />
+            <input id="sourceUrl" type="hidden" />
+          </div>
+
+          <div>
+            <div class="label">Image (thumbnail)</div>
+            <input id="image" class="input" type="file" accept="image/*" />
+            <div class="helper">Optional. Max 3MB. JPG/PNG/WebP/GIF.</div>
+            <label id="clearImageWrap" class="helper" style="display:none; margin-top:10px;">
+              <input id="clearImage" type="checkbox" /> Remove current image
+            </label>
+          </div>
+
+          <div>
+            <div class="label">Title</div>
+            <input id="title" class="input" type="text" placeholder="e.g. Grade 10 Math - Algebra" required />
+          </div>
+
+          <div>
+            <div class="label">Category (subject / note type)</div>
+            <input id="category" class="input" type="text" placeholder="e.g. Math / Notes" required />
+          </div>
+
+          <div>
+            <div class="label">Description (full)</div>
+            <textarea id="description" class="input" placeholder="Write the full description..." required></textarea>
+          </div>
+
+          <div>
+            <div class="label">Google Drive links (one per line)</div>
+            <textarea id="driveLinks" class="input" placeholder="https://drive.google.com/...\nhttps://drive.google.com/..." ></textarea>
+            <div class="helper">Students will open each link in a new tab.</div>
+          </div>
+
+          <div style="display:flex; gap:10px; align-items:center;">
+            <button id="submitBtn" class="btn" type="submit">Publish</button>
+            <button id="cancelEditBtn" class="btn btn-secondary" type="button" style="display:none;">Cancel Edit</button>
+            <button class="btn btn-secondary" type="reset">Clear</button>
+          </div>
+        </div>
+      </form>
+
+      <hr style="margin:18px 0; border:0; border-top:1px solid rgba(16, 42, 67, 0.12);" />
+
+      <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+        <h2 style="margin:0;">Manage Posts</h2>
+        <button id="refreshPostsBtn" class="btn btn-secondary" type="button">Refresh</button>
+      </div>
+      <div class="helper" style="margin-top:8px;">All posts are visible here for editing or deleting.</div>
+      <div id="postsAdminMsg" style="margin-top:12px;"></div>
+      <div id="postsList" class="admin-list" style="margin-top:12px;"></div>
+    </section>
+  </main>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>

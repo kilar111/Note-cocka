@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Secrets
+.env
+
+# Runtime data (local DB)
+data/posts.json
+
+# Uploaded files
+public/uploads/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/

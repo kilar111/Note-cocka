@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NOTE කොක්ක - Study Materials</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <!-- Small top bar (admin link only). Main hero is below. -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="meta">Student materials</div>
+      <a class="btn btn-secondary" href="/admin">Admin</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- HERO: big name first, then search, then cards (as requested) -->
+    <section class="hero">
+      <div class="hero-brand">
+        <img
+          class="hero-logo"
+          src="/assets/logo.png"
+          alt="NOTE කොක්ක logo"
+          loading="eager"
+          onerror="this.onerror=null; this.src='/assets/logo.svg';"
+        />
+        <div>
+          <h1 class="hero-title">NOTE කොක්ක</h1>
+          <p class="hero-subtitle">එකතු වෙන්න • ඉගෙනගන්න • ජයගන්න</p>
+        </div>
+      </div>
+
+      <div class="hero-search">
+        <input id="searchInput" class="input hero-input" type="search" placeholder="Search by title, description, or category..." autocomplete="off" />
+      </div>
+    </section>
+
+    <div id="stats" class="meta"></div>
+
+    <!-- Cards render here -->
+    <section id="postsGrid" class="grid"></section>
+
+    <div id="emptyState" class="empty" style="display:none;">No posts found. Try a different search.</div>
+  </main>
+
+  <script src="/js/index.js"></script>
+</body>
+</html>
