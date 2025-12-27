@@ -80,10 +80,25 @@ function renderPosts(posts) {
 }
 
 async function loadPosts() {
-  const res = await fetch('/api/posts');
-  const data = await res.json();
-  allPosts = data.posts || [];
-  renderPosts(allPosts);
+  const empty = document.getElementById('emptyState');
+  try {
+    const res = await fetch('/api/posts', { cache: 'no-store' });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`);
+    }
+    const data = await res.json();
+    allPosts = data.posts || [];
+    if (empty) empty.textContent = 'No posts yet.';
+    renderPosts(allPosts);
+  } catch (err) {
+    allPosts = [];
+    if (empty) {
+      empty.textContent = 'Posts load වෙන්නේ නැහැ. Page එක refresh කරන්න, නැත්නම් ටිකකින් try කරන්න.';
+    }
+    renderPosts([]);
+    console.error('Failed to load posts:', err);
+  }
 }
 
 function wireSearch() {

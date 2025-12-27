@@ -4,11 +4,17 @@ node_modules/
 # Secrets
 .env
 
-# Runtime data (local DB)
-data/posts.json
+# NOTE: If you want posts & uploaded images to appear on hosts like Vercel
+# (where the filesystem isn't persistent), you must deploy your current data.
+# So we DO track these by default.
+#
+# If you prefer keeping content out of git, re-add these ignores and use a real DB.
+
+# Runtime data (JSON DB)
+# data/posts.json
 
 # Uploaded files
-public/uploads/
+# public/uploads/
 
 # OS / Editor
 .DS_Store

@@ -35,6 +35,7 @@ const ADMIN_PASSWORD_BCRYPT = process.env.ADMIN_PASSWORD_BCRYPT || '';
 
 const DATA_DIR = path.join(__dirname, 'data');
 const POSTS_FILE = path.join(DATA_DIR, 'posts.json');
+const POSTS_EXAMPLE_FILE = path.join(DATA_DIR, 'posts.example.json');
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const UPLOADS_DIR = path.join(PUBLIC_DIR, 'uploads');
@@ -67,14 +68,31 @@ function requireAdmin(req, res, next) {
 
 async function readPostsDb() {
   // Read the whole JSON file as our simple DB.
-  const raw = await fs.readFile(POSTS_FILE, 'utf8');
-  const db = JSON.parse(raw);
-  if (!db.posts || !Array.isArray(db.posts)) db.posts = [];
-  return db;
+  // On some hosts (or fresh deploys) the file may not exist.
+  try {
+    const raw = await fs.readFile(POSTS_FILE, 'utf8');
+    const db = JSON.parse(raw);
+    if (!db.posts || !Array.isArray(db.posts)) db.posts = [];
+    return db;
+  } catch (err) {
+    if (err && err.code === 'ENOENT') {
+      // Fall back to example data if present, otherwise return empty.
+      try {
+        const rawExample = await fs.readFile(POSTS_EXAMPLE_FILE, 'utf8');
+        const dbExample = JSON.parse(rawExample);
+        if (!dbExample.posts || !Array.isArray(dbExample.posts)) dbExample.posts = [];
+        return dbExample;
+      } catch {
+        return { posts: [] };
+      }
+    }
+    throw err;
+  }
 }
 
 async function writePostsDb(db) {
   // Atomic write to avoid corrupting JSON if the process crashes mid-write.
+  await fs.mkdir(DATA_DIR, { recursive: true });
   const tempFile = POSTS_FILE + '.' + crypto.randomBytes(6).toString('hex') + '.tmp';
   await fs.writeFile(tempFile, JSON.stringify(db, null, 2), 'utf8');
   await fs.rename(tempFile, POSTS_FILE);
