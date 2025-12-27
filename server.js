@@ -32,6 +32,16 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'change_me';
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASSWORD_BCRYPT = process.env.ADMIN_PASSWORD_BCRYPT || '';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+
+function constantTimeEqual(a, b) {
+  const aStr = String(a || '');
+  const bStr = String(b || '');
+  const aBuf = Buffer.from(aStr, 'utf8');
+  const bBuf = Buffer.from(bStr, 'utf8');
+  if (aBuf.length !== bBuf.length) return false;
+  return crypto.timingSafeEqual(aBuf, bBuf);
+}
 
 const DATA_DIR = path.join(__dirname, 'data');
 const POSTS_FILE = path.join(DATA_DIR, 'posts.json');
@@ -400,12 +410,21 @@ app.post('/api/admin/login', async (req, res) => {
     const username = safeString(req.body.username);
     const password = safeString(req.body.password);
 
-    if (!ADMIN_PASSWORD_BCRYPT) {
-      return res.status(500).json({ error: 'Admin password hash not configured' });
-    }
-
     const userOk = username === ADMIN_USERNAME;
-    const passOk = await bcrypt.compare(password, ADMIN_PASSWORD_BCRYPT);
+    let passOk = false;
+
+    if (ADMIN_PASSWORD_BCRYPT) {
+      passOk = await bcrypt.compare(password, ADMIN_PASSWORD_BCRYPT);
+    } else if (ADMIN_PASSWORD) {
+      // Fallback for hosts like Vercel: set ADMIN_PASSWORD as a secret env var.
+      // (Recommended is still ADMIN_PASSWORD_BCRYPT.)
+      passOk = constantTimeEqual(password, ADMIN_PASSWORD);
+    } else {
+      return res.status(500).json({
+        error:
+          'Admin password not configured. Set ADMIN_PASSWORD_BCRYPT (recommended) or ADMIN_PASSWORD in environment variables.'
+      });
+    }
 
     if (!userOk || !passOk) {
       return res.status(401).json({ error: 'Invalid credentials' });
