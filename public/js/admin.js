@@ -8,6 +8,9 @@
 let editingId = null;
 let adminPosts = [];
 
+const ADMIN_ROUTE = '/admin';
+const ADMIN_LOGIN_ROUTE = '/admin-login';
+
 function formatDate(iso) {
   try {
     return new Date(iso).toLocaleString();
@@ -198,6 +201,23 @@ async function checkAuth() {
 
 async function render() {
   const authed = await checkAuth();
+
+  // Keep routes clean:
+  // - If not authenticated, never stay on /admin (dashboard route)
+  // - If authenticated, don't stay on /admin-login
+  try {
+    const path = window.location.pathname;
+    if (!authed && path === ADMIN_ROUTE) {
+      window.location.replace(ADMIN_LOGIN_ROUTE);
+      return;
+    }
+    if (authed && path === ADMIN_LOGIN_ROUTE) {
+      window.location.replace(ADMIN_ROUTE);
+      return;
+    }
+  } catch {
+    // ignore
+  }
 
   show('loginPanel', !authed);
   show('dashboard', authed);

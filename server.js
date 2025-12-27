@@ -76,6 +76,11 @@ function requireAdmin(req, res, next) {
   return res.status(401).json({ error: 'Unauthorized' });
 }
 
+function requireAdminPage(req, res, next) {
+  if (req.session && req.session.isAdmin) return next();
+  return res.redirect('/admin-login');
+}
+
 async function readPostsDb() {
   // Read the whole JSON file as our simple DB.
   // On some hosts (or fresh deploys) the file may not exist.
@@ -617,9 +622,19 @@ app.get('/api/admin/fb-preview', requireAdmin, async (req, res) => {
 
 // ---------- Admin route ----------
 
-// Serve the admin page (the page UI is password-gated via API checks)
-app.get('/admin', (_req, res) => {
+// Admin login page (shows login UI when not authenticated)
+app.get('/admin-login', (_req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'admin.html'));
+});
+
+// Admin dashboard (only reachable when authenticated)
+app.get('/admin', requireAdminPage, (_req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'admin.html'));
+});
+
+// Prevent direct access to the static admin file path.
+app.get('/admin.html', (_req, res) => {
+  res.redirect('/admin-login');
 });
 
 // Convenience: home + post details are static HTML
