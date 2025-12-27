@@ -2,6 +2,8 @@
 // Fetch posts from backend, render responsive cards, and filter instantly on the frontend.
 
 let allPosts = [];
+let selectedCategory = 'All';
+let selectedQuery = '';
 
 function el(tag, className) {
   const node = document.createElement(tag);
@@ -23,6 +25,86 @@ function matchesQuery(post, q) {
   return hay.includes(q);
 }
 
+function matchesCategory(post, category) {
+  if (!category || category === 'All') return true;
+  return String(post.category || '').trim().toLowerCase() === String(category).trim().toLowerCase();
+}
+
+function applyFilters() {
+  const q = String(selectedQuery || '').trim().toLowerCase();
+  const filtered = allPosts.filter((p) => matchesCategory(p, selectedCategory) && matchesQuery(p, q));
+  renderPosts(filtered);
+}
+
+function uniqueCategoriesFromPosts(posts) {
+  const set = new Set();
+  for (const p of posts) {
+    const c = String(p.category || '').trim();
+    if (c) set.add(c);
+  }
+  return Array.from(set);
+}
+
+function buildCategoryList(posts) {
+  // Keep the requested common subjects visible, but also include any real categories found.
+  const preferred = ['All', 'Art', 'Maths', 'Physics', 'Chemistry', 'Biology', 'ICT', 'English', 'Sinhala'];
+  const detected = uniqueCategoriesFromPosts(posts);
+
+  const normalized = new Map();
+  for (const c of detected) {
+    normalized.set(c.toLowerCase(), c);
+  }
+
+  const out = [];
+  for (const c of preferred) {
+    if (c === 'All') {
+      out.push('All');
+      continue;
+    }
+    const hit = normalized.get(c.toLowerCase());
+    if (hit) out.push(hit);
+    else out.push(c);
+  }
+
+  // Append any remaining categories not in preferred.
+  const preferredSet = new Set(preferred.map((x) => x.toLowerCase()));
+  for (const c of detected) {
+    if (!preferredSet.has(c.toLowerCase())) out.push(c);
+  }
+
+  // Remove duplicates preserving order.
+  const final = [];
+  const seen = new Set();
+  for (const c of out) {
+    const key = c.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    final.push(c);
+  }
+  return final;
+}
+
+function renderCategoryChips(categories) {
+  const wrap = document.getElementById('categoryChips');
+  if (!wrap) return;
+
+  wrap.innerHTML = '';
+  for (const c of categories) {
+    const btn = el('button', 'chip');
+    btn.type = 'button';
+    btn.textContent = c;
+    if (String(c).toLowerCase() === String(selectedCategory).toLowerCase()) {
+      btn.classList.add('is-active');
+    }
+    btn.addEventListener('click', () => {
+      selectedCategory = c;
+      renderCategoryChips(categories);
+      applyFilters();
+    });
+    wrap.appendChild(btn);
+  }
+}
+
 function renderPosts(posts) {
   const grid = document.getElementById('postsGrid');
   const empty = document.getElementById('emptyState');
@@ -30,7 +112,8 @@ function renderPosts(posts) {
 
   grid.innerHTML = '';
 
-  stats.textContent = `${posts.length} post(s) shown`;
+  const catLabel = selectedCategory && selectedCategory !== 'All' ? ` • ${selectedCategory}` : '';
+  stats.textContent = `${posts.length} post(s) shown${catLabel}`;
 
   if (posts.length === 0) {
     empty.style.display = 'block';
@@ -90,13 +173,21 @@ async function loadPosts() {
     const data = await res.json();
     allPosts = data.posts || [];
     if (empty) empty.textContent = 'No posts yet.';
-    renderPosts(allPosts);
+    const categories = buildCategoryList(allPosts);
+    // If current selection no longer exists, reset.
+    if (selectedCategory !== 'All') {
+      const exists = categories.some((c) => c.toLowerCase() === selectedCategory.toLowerCase());
+      if (!exists) selectedCategory = 'All';
+    }
+    renderCategoryChips(categories);
+    applyFilters();
   } catch (err) {
     allPosts = [];
     if (empty) {
       empty.textContent = 'Posts load වෙන්නේ නැහැ. Page එක refresh කරන්න, නැත්නම් ටිකකින් try කරන්න.';
     }
-    renderPosts([]);
+    renderCategoryChips(buildCategoryList([]));
+    applyFilters();
     console.error('Failed to load posts:', err);
   }
 }
@@ -104,9 +195,8 @@ async function loadPosts() {
 function wireSearch() {
   const input = document.getElementById('searchInput');
   input.addEventListener('input', () => {
-    const q = input.value.trim().toLowerCase();
-    const filtered = allPosts.filter((p) => matchesQuery(p, q));
-    renderPosts(filtered);
+    selectedQuery = input.value || '';
+    applyFilters();
   });
 }
 
